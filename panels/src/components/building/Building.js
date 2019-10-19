@@ -212,6 +212,12 @@ class Model {
     return this.hover;
   }
 
+  removeCurrLayer() {
+    if(this.hover == this.editing && this.hover != -1 && this.hover != 0 && this.hover != this.layers.length-1) {
+      this.layers.splice(this.hover, 1);
+    }
+  }
+
   clearEdit() {
     if(this.editing != -1) {
       this.layers[this.editing].edit = false;
@@ -349,6 +355,8 @@ function Begin() {
   
   //onResize();
   //window.onresize = onResize;
+
+  document.onkeydown = canvasKeyPress;
 }
 
 function dragLayer(e) {
@@ -403,6 +411,12 @@ function Edit(layer) {
     title.innerHTML = n;
     layer.name = n;
     curr_model.draw();
+  }
+}
+
+function canvasKeyPress(e) {
+  if(e.keyCode == 46 || e.keyCode == 8) {
+    curr_model.removeCurrLayer();
   }
 }
 
