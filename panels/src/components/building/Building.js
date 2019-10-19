@@ -160,8 +160,8 @@ class Model {
     this.grabbed = false;
     this.grab_offset = new Vec2(0,0);
     this.editing = -1;
-    this.layers.push(new InputLayer("Input", 100, false)); 
-    this.layers.push(new OutputLayer("Output", 100, false)); 
+    this.layers.push(new InputLayer("Input", 1, false)); 
+    this.layers.push(new OutputLayer("Output", 1, false)); 
   }
 
   appendLayer(name, n_nodes) {
@@ -330,7 +330,7 @@ function canvasMouseOut(e) {
 
 var curr_model;
 
-function Begin() {
+function Begin(model) {
   let context = getContext("canvas");
 
   let layers = document.getElementById("horizontal-list").children;
@@ -346,11 +346,13 @@ function Begin() {
     context.canvas.onmouseout = canvasMouseOut;
   }
 
-
-  let model = new Model("Model1", context);
-  //model.appendLayer("Layer2", 10);
+  if(!model) {
+    var model = new Model("Model1", context);
+    //model.appendLayer("Layer2", 10);
+  }
 
   curr_model = model;
+  curr_model.context = context;
   model.draw();
   
   //onResize();
@@ -361,6 +363,7 @@ function Begin() {
 
 function dragLayer(e) {
   e.dataTransfer.setData("name", e.target.dataset.name);
+  e.dataTransfer.setData("activation", e.target.dataset.activation);
 }
 
 function canvasAllowDrop(e) {
@@ -374,6 +377,7 @@ function canvasDrop(e) {
 
   let name = e.dataTransfer.getData("name");
   let layer = curr_model.appendLayer(name + " 1", 10);
+  layer.activation = e.dataTransfer.getData("activation");
 
   layer.bbox.x = p.x - layer.bbox.w/2;
   layer.bbox.y = p.y - layer.bbox.h/2;
@@ -402,7 +406,7 @@ function Edit(layer) {
     } else {
       invalid_value.style.display = "none";
     }
-    layer.n_nodes = this.value;
+    layer.n_nodes = parseInt(this.value);
   }
   
   title.oninput = function() {
@@ -422,7 +426,8 @@ function canvasKeyPress(e) {
 
 class Building extends Component {
   componentDidMount() {
-    Begin();
+    Begin(this.props.getModel());
+    this.props.setModel(curr_model);
   }
 
   render() {
@@ -432,17 +437,25 @@ class Building extends Component {
           <h3 className="layers-title">Layers</h3>
           <div className="table">
             <ul id="horizontal-list">
-              <li draggable="true" onDragStart={dragLayer} data-name="Sigmoid">
+              <li draggable="true" onDragStart={dragLayer} data-name="Sigmoid" data-activation="sigmoid">
                 <canvas id="sigmoid_canvas" width="150" height="30"></canvas>
               </li>
-              <li draggable="true" onDragStart={dragLayer} data-name="ReLu">
+              <li draggable="true" onDragStart={dragLayer} data-name="ReLu" data-activation="relu">
                 <canvas id="relu_canvas" width="150" height="30"></canvas>
               </li>
-              <li draggable="true" onDragStart={dragLayer} data-name="Tanh">
+              <li draggable="true" onDragStart={dragLayer} data-name="Tanh" data-activation="tanh">
                 <canvas id="tanh_canvas" width="150" height="30"></canvas>
               </li>
             </ul>
           </div>
+          <div className="left-break"></div>
+          <b>Training Data</b>
+          <input className="file-input" type="file" id="train_f"></input>
+          <button id="train" onClick={this.props.train}>TRAIN</button><br></br>
+          <div className="left-break"></div>
+          <b>Testing Data</b>
+          <input className="file-input" type="file" id="test_f"></input>
+          <button id="test" onClick={this.props.test}>TEST</button>
         </div>
         <div id="canvas-wrap">
           <canvas id="canvas" width="800" height="800" onDrop={canvasDrop} onDragOver={canvasAllowDrop}>
