@@ -11,8 +11,8 @@ function pathRoundedRect(ctx, x, y, width, height, radius) {
   ctx.arcTo(x, y, x, y + radius, radius);
 }
 
-function getContext() {
-  const canvas = document.getElementById("canvas");
+function getContext(id) {
+  const canvas = document.getElementById(id);
   let context = null;
   if(canvas.getContext) {
     context = canvas.getContext("2d");
@@ -45,10 +45,14 @@ class BBox {
 }
 
 class Layer {
-  constructor(name, n_nodes) {
+  constructor(name, n_nodes, fill) {
     this.name = name;
     this.n_nodes = n_nodes;
-    this.bbox = new BBox(0.2, 0.5, 0.4, 0.05); // width, height
+    if(fill) {
+      this.bbox = new BBox(0, 0, 1, 1);
+    } else {
+      this.bbox = new BBox(0.2, 0.5, 0.4, 0.05);
+    }
     this.fillStyle = "#99F";
     this.strokeStyle = "#111";
     this.lineWidth = 1;
@@ -110,7 +114,22 @@ class Model {
   }
 
   appendLayer(name, n_nodes) {
-    this.layers.push(new Layer(name, n_nodes));
+    for(l in this.layers) {
+      if(this.layers[l].name == name) {
+        let words = this.layers[l].name.split(" ");
+        let num = parseInt(words[words.length-1]);
+
+        if(isNaN(num)) {
+          name += " 1";
+        } else {
+          name = words.slice(0,-1).join(" ") + " " + (num+1);
+        }
+      }
+    }
+    let layer = new Layer(name, n_nodes, false);
+    this.layers.push(layer);
+
+    return layer;
   }
 
   draw() {
@@ -151,10 +170,11 @@ class Model {
   grab(p) {
     if(this.hover != -1) {
       this.grabbed = true;
+      this.grab_offset.x = p.x - this.layers[this.hover].bbox.x;
+      this.grab_offset.y = p.y - this.layers[this.hover].bbox.y;
+
+      Edit(this.layers[this.hover]);
     }
-    
-    this.grab_offset.x = p.x - this.layers[this.hover].bbox.x;
-    this.grab_offset.y = p.y - this.layers[this.hover].bbox.y;
   }
   
   move(p) {
@@ -217,6 +237,8 @@ function canvasMouseDown(e) {
   if(curr_model.isHover) {
     console.log("grab");
     curr_model.grab(p);
+  } else {
+    document.getElementById("edit-tab").style.display = "none";
   }
 
   curr_model.draw();
@@ -236,7 +258,13 @@ function canvasMouseOut(e) {
 var curr_model;
 
 function Begin() {
-  let context = getContext();
+  let context = getContext("canvas");
+
+  let layers = document.getElementById("horizontal-list").children;
+  for(var l = 0; l < layers.length; l++) {
+    let context_layer = getContext(layers[l].children[0].id);
+    (new Layer(layers[l].dataset.name, 0, true)).draw(context_layer);
+  }
 
   if(context) {
     context.canvas.onmousemove = canvasMouseMove;
@@ -246,11 +274,47 @@ function Begin() {
   }
 
   let model = new Model("Model1", context);
-  model.appendLayer("Layer 1", 10);
-  model.appendLayer("Layer 2", 10);
-  model.appendLayer("Layer 3", 10);
   //model.appendLayer("Layer2", 10);
 
   curr_model = model;
   model.draw();
+}
+
+function dragLayer(e) {
+  e.dataTransfer.setData("name", e.target.dataset.name);
+}
+
+function canvasAllowDrop(e) {
+  e.preventDefault();
+}
+
+function canvasDrop(e) {
+  e.preventDefault();
+
+  let p = getNormMouse(curr_model.context.canvas, e);
+
+  let name = e.dataTransfer.getData("name");
+  let layer = curr_model.appendLayer(name + " 1", 10);
+
+  layer.bbox.x = p.x - layer.bbox.w/2;
+  layer.bbox.y = p.y - layer.bbox.h/2;
+
+  Edit(layer);
+}
+
+function Edit(layer) {
+  document.getElementById("edit-tab").style.display = "block";
+  let num_nodes = document.getElementById("num_nodes");
+  let invalid_value = document.getElementById("invalid_nnodes");
+  let title = document.getElementById("edit-title");
+  title.innerHTML = layer.name;
+  num_nodes.value = layer.n_nodes;
+
+  num_nodes.oninput = function() {
+    let val = parseInt(this.value);
+    if(isNaN(val) || val <= 0) {
+      invalid_value.style.display = "block";
+    }
+    layer.n_nodes = this.value;
+  }
 }
