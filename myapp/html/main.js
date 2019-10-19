@@ -83,6 +83,13 @@ class Layer {
     ctx.stroke();
   }
 
+  drawBackground(ctx) {
+    let w = ctx.canvas.clientWidth;
+    let h = ctx.canvas.clientHeight;
+    
+    pathRoundedRect(ctx, this.bbox.x * w, this.bbox.y * h, this.bbox.w * w, this.bbox.h * h, 10);
+  }
+
   draw(ctx) {
     let w = ctx.canvas.clientWidth;
     let h = ctx.canvas.clientHeight;
@@ -91,7 +98,7 @@ class Layer {
     ctx.strokeStyle = this.strokeStyle;
     ctx.lineWidth = this.lineWidth;
 
-    pathRoundedRect(ctx, this.bbox.x * w, this.bbox.y * h, this.bbox.w * w, this.bbox.h * h, 10);
+    this.drawBackground(ctx);
     ctx.fill();
     ctx.stroke();
    
@@ -103,6 +110,31 @@ class Layer {
   }
 }
 
+class InputLayer extends Layer {
+  constructor(name, n_nodes, fill) {
+    super(name, n_nodes, fill);
+    this.fillStyle = "#9F9";
+    this.bbox = new BBox(0.45, 0.1, 0.1, 0.1);
+  }
+
+  drawBackground(ctx) {
+    let w = ctx.canvas.clientWidth;
+    let h = ctx.canvas.clientHeight;
+
+    ctx.beginPath();
+    ctx.arc((this.bbox.x + this.bbox.w/2)*w, (this.bbox.y+this.bbox.h/2)*h, w*this.bbox.w/2, 0, 2*Math.PI);
+    ctx.closePath();
+  }
+}
+
+class OutputLayer extends InputLayer {
+  constructor(name, n_nodes, fill) {
+    super(name, n_nodes, fill);
+    this.fillStyle = "#F99";
+    this.bbox = new BBox(0.45, 0.8, 0.1, 0.1);
+  }
+}
+
 class Model {
   constructor(name, context) {
     this.layers = [];
@@ -111,10 +143,12 @@ class Model {
     this.hover = -1;
     this.grabbed = false;
     this.grab_offset = new Vec2(0,0);
+    this.layers.push(new InputLayer("Input", 100, false)); 
+    this.layers.push(new OutputLayer("Output", 100, false)); 
   }
 
   appendLayer(name, n_nodes) {
-    for(l in this.layers) {
+    for(var l in this.layers) {
       if(this.layers[l].name == name) {
         let words = this.layers[l].name.split(" ");
         let num = parseInt(words[words.length-1]);
@@ -127,7 +161,7 @@ class Model {
       }
     }
     let layer = new Layer(name, n_nodes, false);
-    this.layers.push(layer);
+    this.layers.splice(-1, 0, layer);
 
     return layer;
   }
@@ -273,11 +307,15 @@ function Begin() {
     context.canvas.onmouseout = canvasMouseOut;
   }
 
+
   let model = new Model("Model1", context);
   //model.appendLayer("Layer2", 10);
 
   curr_model = model;
   model.draw();
+  
+  //onResize();
+  //window.onresize = onResize;
 }
 
 function dragLayer(e) {
@@ -300,6 +338,14 @@ function canvasDrop(e) {
   layer.bbox.y = p.y - layer.bbox.h/2;
 
   Edit(layer);
+}
+
+function onResize() {
+  let canvas = document.getElementById("canvas");
+  let canvas_wrap = document.getElementById("canvas-wrap");
+
+  canvas.width = canvas_wrap.offsetWidth;
+  curr_model.draw();
 }
 
 function Edit(layer) {

@@ -1,18 +1,63 @@
 #menu-outer {
-	height: 84px;
-	background: url(images/bar-bg.jpg) repeat-x;
+  flex-grow: 0;
+  flex-shrink: 1;
+  border: 2px solid #aaa;
+  border-width: 2px 1px 2px 2px;
+  border-radius: 5px 0px 0px 5px;
+  padding: 5px;
+}
+
+.layers-title {
+  font-size: 20px;
+  text-align: center;
+  border-bottom: 2px solid #bbb;
+  padding-bottom: 5px;
+  margin: 10px 0px 0px 0px;
 }
 
 .table {
 	display: table;   /* Allow the centering to work */
-	margin: 0 auto;
+	margin: 5px auto;
 }
 
-ul#horizontal-list {
-	min-width: 696px;
+#horizontal-list {
 	list-style: none;
-	padding-top: 20px;
-	}
-	ul#horizontal-list li {
-		display: inline;
-	}
+	padding: 5px;
+  margin: 0;
+}
+
+#horizontal-list li {
+  display: block;
+  margin: 10px 0px;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  padding: 40px;
+}
+
+#edit-tab {
+  position: absolute;
+  top: 2;
+  right: 2;
+  background: #eee;
+  padding: 20px;
+  border-radius: 0px 0px 0px 5px;
+  border: 2px solid #777;
+  border-width: 0px 0px 2px 2px;
+  display: none;
+}
+
+#canvas-wrap {
+  flex-grow: 0;
+  flex-shrink: 0;
+  max-width: 800px;
+  position: relative;
+}
+
+#canvas {
+  border: 2px solid #aaa;
+  border-width: 2px 2px 2px 1px;
+  border-radius: 0px 5px 5px 0px;
+}
