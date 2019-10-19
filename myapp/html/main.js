@@ -56,6 +56,7 @@ class Layer {
     this.fillStyle = "#99F";
     this.strokeStyle = "#111";
     this.lineWidth = 1;
+    this.edit = false;
   }
 
   setHover() {
@@ -143,6 +144,7 @@ class Model {
     this.hover = -1;
     this.grabbed = false;
     this.grab_offset = new Vec2(0,0);
+    this.editing = -1;
     this.layers.push(new InputLayer("Input", 100, false)); 
     this.layers.push(new OutputLayer("Output", 100, false)); 
   }
@@ -162,6 +164,7 @@ class Model {
     }
     let layer = new Layer(name, n_nodes, false);
     this.layers.splice(-1, 0, layer);
+    this.edit(this.layers.length - 2);
 
     return layer;
   }
@@ -194,6 +197,17 @@ class Model {
     return this.hover;
   }
 
+  clearEdit() {
+    this.editing = -1;
+    this.layers[this.editing].edit = false;
+  }
+
+  edit(idx) {
+    this.editing = idx;
+    this.layers[idx].edit = true;
+    Edit(this.layers[idx]);
+  }
+
   clearHover() {
     if(this.hover != -1) {
       this.layers[this.hover].clearHover();
@@ -207,7 +221,7 @@ class Model {
       this.grab_offset.x = p.x - this.layers[this.hover].bbox.x;
       this.grab_offset.y = p.y - this.layers[this.hover].bbox.y;
 
-      Edit(this.layers[this.hover]);
+      this.edit(this.hover);
     }
   }
   
@@ -273,6 +287,7 @@ function canvasMouseDown(e) {
     curr_model.grab(p);
   } else {
     document.getElementById("edit-tab").style.display = "none";
+    curr_model.clearEdit();
   }
 
   curr_model.draw();
@@ -336,8 +351,6 @@ function canvasDrop(e) {
 
   layer.bbox.x = p.x - layer.bbox.w/2;
   layer.bbox.y = p.y - layer.bbox.h/2;
-
-  Edit(layer);
 }
 
 function onResize() {
@@ -353,14 +366,24 @@ function Edit(layer) {
   let num_nodes = document.getElementById("num_nodes");
   let invalid_value = document.getElementById("invalid_nnodes");
   let title = document.getElementById("edit-title");
-  title.innerHTML = layer.name;
+  title.value = layer.name;
   num_nodes.value = layer.n_nodes;
 
   num_nodes.oninput = function() {
     let val = parseInt(this.value);
     if(isNaN(val) || val <= 0) {
       invalid_value.style.display = "block";
+    } else {
+      invalid_value.style.display = "none";
     }
     layer.n_nodes = this.value;
+  }
+  
+  title.oninput = function() {
+    n = this.value;
+
+    title.innerHTML = n;
+    layer.name = n;
+    curr_model.draw();
   }
 }
