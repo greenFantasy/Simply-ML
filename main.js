@@ -48,7 +48,7 @@ class Layer {
   constructor(name, n_nodes) {
     this.name = name;
     this.n_nodes = n_nodes;
-    this.bbox = new BBox(0.1, 0.5, 0.05, 0.4); // width, height
+    this.bbox = new BBox(0.2, 0.5, 0.4, 0.05); // width, height
     this.fillStyle = "#99F";
     this.strokeStyle = "#111";
     this.lineWidth = 1;
@@ -62,6 +62,23 @@ class Layer {
     this.lineWidth = 1;
   }
 
+  drawCurveTo(layer, ctx) {
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 1;
+    let w = ctx.canvas.clientWidth;
+    let h = ctx.canvas.clientHeight;
+    let begin = new Vec2(layer.bbox.x + layer.bbox.w/2, layer.bbox.y + layer.bbox.h/2);
+    let end = new Vec2(this.bbox.x + this.bbox.w/2, this.bbox.y + this.bbox.h/2);
+
+    let cp1 = new Vec2(begin.x + layer.bbox.w/3, begin.y);
+    let cp2 = new Vec2(end.x - this.bbox.w/3, end.y);
+
+    ctx.beginPath();
+    ctx.moveTo(w*begin.x, h*begin.y);
+    ctx.bezierCurveTo(w*cp1.x, h*cp1.y, w*cp2.x, h*cp2.y, w*end.x, h*end.y);
+    ctx.stroke();
+  }
+
   draw(ctx) {
     let w = ctx.canvas.clientWidth;
     let h = ctx.canvas.clientHeight;
@@ -73,6 +90,12 @@ class Layer {
     pathRoundedRect(ctx, this.bbox.x * w, this.bbox.y * h, this.bbox.w * w, this.bbox.h * h, 10);
     ctx.fill();
     ctx.stroke();
+   
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "16px serif";
+    ctx.fillStyle = "black";
+    ctx.fillText(this.name, w*(this.bbox.x+this.bbox.w/2), h*(this.bbox.y+this.bbox.h/2));
   }
 }
 
@@ -87,7 +110,7 @@ class Model {
   }
 
   appendLayer(name, n_nodes) {
-    this.layers.push(new Layer(this.name + ":" + name, n_nodes));
+    this.layers.push(new Layer(name, n_nodes));
   }
 
   draw() {
@@ -96,7 +119,10 @@ class Model {
     }
  
     this.context.clearRect(0, 0, this.context.canvas.clientWidth, this.context.canvas.clientHeight);
-  
+ 
+    for(var l = 0; l < this.layers.length - 1; l++) { 
+      this.layers[l].drawCurveTo(this.layers[l+1], this.context);
+    }
     for(var l in this.layers) {
       this.layers[l].draw(this.context);
     }
@@ -115,9 +141,11 @@ class Model {
     return this.hover;
   }
 
-  clearHover(idx) {
+  clearHover() {
+    if(this.hover != -1) {
+      this.layers[this.hover].clearHover();
+    }
     this.hover = -1;
-    this.layers[idx].clearHover();
   }
   
   grab(p) {
@@ -163,14 +191,14 @@ function canvasMouseMove(e) {
     return;
   }
 
+  curr_model.clearHover();
+
   let hover = false;
   for(l in curr_model.layers) {
     if(curr_model.layers[l].bbox.contains(p)) {
       curr_model.setHover(l);
       hover = true;
       break;
-    } else {
-      curr_model.clearHover(l);
     }
   }
 
@@ -196,6 +224,13 @@ function canvasMouseDown(e) {
 
 function canvasMouseUp(e) {
   curr_model.release();
+  curr_model.draw();
+}
+
+function canvasMouseOut(e) {
+  curr_model.release();
+  curr_model.clearHover();
+  curr_model.draw();
 }
 
 var curr_model;
@@ -207,12 +242,13 @@ function Begin() {
     context.canvas.onmousemove = canvasMouseMove;
     context.canvas.onmousedown = canvasMouseDown;
     context.canvas.onmouseup = canvasMouseUp;
+    context.canvas.onmouseout = canvasMouseOut;
   }
 
   let model = new Model("Model1", context);
-  model.appendLayer("Layer1", 10);
-  model.appendLayer("Layer1", 10);
-  model.appendLayer("Layer1", 10);
+  model.appendLayer("Layer 1", 10);
+  model.appendLayer("Layer 2", 10);
+  model.appendLayer("Layer 3", 10);
   //model.appendLayer("Layer2", 10);
 
   curr_model = model;
