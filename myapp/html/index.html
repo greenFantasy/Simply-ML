@@ -6,16 +6,23 @@
 </head>
 
 <body onload="Begin()">
-<div id="menu-outer">
-  <div class="table">
-    <ul id="horizontal-list">
-      <li draggable="true" ondragstart="dragLayer(event)" data-name="Hidden Layer">
-        <canvas id="layer1_canvas" width="150" height="30"></canvas>
-      </li>
-    </ul>
-  </div>
-</div>
 <div class="container">
+  <div id="menu-outer">
+    <h3 class="layers-title">Layers</h3>
+    <div class="table">
+      <ul id="horizontal-list">
+        <li draggable="true" ondragstart="dragLayer(event)" data-name="Sigmoid">
+          <canvas id="sigmoid_canvas" width="150" height="30"></canvas>
+        </li>
+        <li draggable="true" ondragstart="dragLayer(event)" data-name="ReLu">
+          <canvas id="relu_canvas" width="150" height="30"></canvas>
+        </li>
+        <li draggable="true" ondragstart="dragLayer(event)" data-name="Tanh">
+          <canvas id="tanh_canvas" width="150" height="30"></canvas>
+        </li>
+      </ul>
+    </div>
+  </div>
   <div id="canvas-wrap">
     <canvas id="canvas" width="800" height="800" ondrop="canvasDrop(event)" ondragover="canvasAllowDrop(event)">
       <div class="no-canvas">Whoops! It looks like canvas isn't supported. Please upgrade to a newer browser.</div>
