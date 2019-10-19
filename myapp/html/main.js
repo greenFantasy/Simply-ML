@@ -91,6 +91,15 @@ class Layer {
     pathRoundedRect(ctx, this.bbox.x * w, this.bbox.y * h, this.bbox.w * w, this.bbox.h * h, 10);
   }
 
+  drawEdit(ctx) {
+    let w = ctx.canvas.clientWidth;
+    let h = ctx.canvas.clientHeight;
+    
+    ctx.lineWidth = "1px";
+    let p = 0.02;
+    ctx.strokeRect(w*(this.bbox.x-p), h*(this.bbox.y-p), w*(this.bbox.w+2*p), h*(this.bbox.h+2*p));
+  }
+
   draw(ctx) {
     let w = ctx.canvas.clientWidth;
     let h = ctx.canvas.clientHeight;
@@ -98,6 +107,10 @@ class Layer {
     ctx.fillStyle = this.fillStyle;
     ctx.strokeStyle = this.strokeStyle;
     ctx.lineWidth = this.lineWidth;
+
+    if(this.edit) {
+      this.drawEdit(ctx);
+    }
 
     this.drawBackground(ctx);
     ctx.fill();
@@ -198,11 +211,14 @@ class Model {
   }
 
   clearEdit() {
-    this.editing = -1;
-    this.layers[this.editing].edit = false;
+    if(this.editing != -1) {
+      this.layers[this.editing].edit = false;
+      this.editing = -1;
+    }
   }
 
   edit(idx) {
+    this.clearEdit();
     this.editing = idx;
     this.layers[idx].edit = true;
     Edit(this.layers[idx]);

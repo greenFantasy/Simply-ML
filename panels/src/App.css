@@ -83,8 +83,8 @@
 
 #edit-tab {
   position: absolute;
-  top: 2;
-  right: 2;
+  top: 2px;
+  right: 2px;
   background: #eee;
   padding: 20px;
   border-radius: 0px 0px 0px 5px;
