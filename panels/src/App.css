@@ -160,8 +160,9 @@ button{
   padding: 20px;
   margin: 0;
   font-family: "Courier";
-  color: yellow;
   font-weight: bold;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 #error-table {
@@ -187,5 +188,5 @@ button{
 #showvisor {
   position: fixed;
   right: 20px;
-  top: 20px;
+  top: 0px;
 }
