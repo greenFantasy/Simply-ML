@@ -1,3 +1,7 @@
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
 .App {
   text-align: center;
 }
@@ -85,6 +89,7 @@
   display: flex;
   flex-direction: row;
   padding: 40px;
+  justify-content: center;
 }
 
 #edit-tab {
@@ -92,11 +97,22 @@
   top: 2px;
   right: 2px;
   background: #eee;
-  padding: 20px;
+  padding: 12px;
   border-radius: 0px 0px 0px 5px;
   border: 2px solid #777;
   border-width: 0px 0px 2px 2px;
   display: none;
+  font-size: 14px;
+  text-align: center;
+}
+
+input[type=text] {
+  padding: 10px;
+  font-size: 15px;
+  text-align: center;
+  width: 50px;
+  display: block;
+  margin: 10px auto;
 }
 
 #canvas-wrap {
@@ -111,9 +127,10 @@
 
 #menu-outer button{
   display: block;
-  padding: 15px;
+  padding: 15px 40px;
   margin: 10px;
   display: inline-block;
+  font-size: 16px;
 }
 
 #menu-outer b {
@@ -124,4 +141,10 @@
 
 .file-input {
   padding: 10px;
+  width: 160px;
+}
+
+.main-title {
+  text-align: center;
+  padding: 20px;
 }

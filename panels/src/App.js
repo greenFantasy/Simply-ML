@@ -13,18 +13,62 @@ require('./App.css');
  */
 function cleanData(data) {
   const features = data.features;
-  const X = data.X;
-  const y = data.y;
+  const X_in = data.X;
+  const y_in = data.y;
 
-  let split = Math.floor(0.5*X.length);
+  let norm_data = {};
+  norm_data.X = [];
 
-  const trainX = X.slice(0, split);
-  const trainy = y.slice(0, split);
-  const testX = X.slice(split);
-  const testy = y.slice(split);
+  for(var j = 0; j < X_in[0].length; j++) {
+    let max = -10000000;
+    let min = 10000000;
+    for(var i = 0; i < X_in.length; i++) {
+      if(X_in[i][j] > max) {
+        max = X_in[i][j];
+      }
+      if(X_in[i][j] < min) {
+        min = X_in[i][j];
+      }
+    }
+    for(var i = 0; i < X_in.length; i++) {
+      X_in[i][j] = (X_in[i][j] - min) / (max - min);
+    }
+    norm_data.X.push({ min: min, max: max });
+  }
+    
+  let max = -10000000;
+  let min = 10000000;
+  for(var j = 0; j < y_in.length; j++) {
+    if(y_in[j][0] > max) {
+      max = y_in[j][0];
+    }
+    if(y_in[j][0] < min) {
+      min = y_in[j][0];
+    }
+  }
+  for(var j = 0; j < y_in.length; j++) {
+   y_in[j][0] = (y_in[j][0] - min) / (max - min);
+  }
+  norm_data.y = { min: min, max: max };
 
+  let train_X = [];
+  let train_y = [];
+  let test_X = [];
+  let test_y = [];
+  let split = 0.8;
 
-  return {trainX: trainX, trainy: trainy, testX: testX, testy: testy, features: features};
+  for(var i = 0; i < X_in.length; i++) {
+    if(Math.random() < split) {
+      train_X.push(X_in[i]);
+      train_y.push(y_in[i]);
+    } else {
+      test_X.push(X_in[i]);
+      test_y.push(y_in[i]);
+    }
+  }
+  
+
+  return {trainX: train_X, trainy: train_y, testX: test_X, testy: test_y, features: features, norm_data: norm_data};
 }
 
 /**
@@ -33,13 +77,13 @@ function cleanData(data) {
  * the data and _normalizing_ the data
  * MPG on the y-axis.
  */
-function convertToTensor(data) {
+function convertToTensor(data, norm) {
   // Wrapping these calculations in a tidy will dispose any
   // intermediate tensors.
 
   return tf.tidy(() => {
     // Step 1. Shuffle the data
-    tf.util.shuffle(data);
+    //tf.util.shuffle(data);
 
     // Step 2. Convert data to Tensor
     const inputs = data.X;
@@ -47,24 +91,10 @@ function convertToTensor(data) {
 
     const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
     const labelTensor = tf.tensor2d(labels, [labels.length, labels[0].length]);
-
-    //Step 3. Normalize the data to the range 0 - 1 using min-max scaling
-    const inputMax = inputTensor.max();
-    const inputMin = inputTensor.min();
-    const labelMax = labelTensor.max();
-    const labelMin = labelTensor.min();
-
-    const normalizedInputs = inputTensor.sub(inputMin).div(inputMax.sub(inputMin));
-    const normalizedLabels = labelTensor.sub(labelMin).div(labelMax.sub(labelMin));
-
+  
     return {
-      inputs: normalizedInputs,
-      labels: normalizedLabels,
-      // Return the min/max bounds so we can use them later.
-      inputMax,
-      inputMin,
-      labelMax,
-      labelMin,
+      inputs: inputTensor,
+      labels: labelTensor,
     }
   });
 }
@@ -87,49 +117,32 @@ async function trainModel(model, inputs, labels, features) {
       shuffle: true,
       callbacks: tfvis.show.fitCallbacks(
         { name: 'Training Performance' },
-        ['loss', 'mse','acc'],
-        { height: 200, callbacks: ['onEpochEnd'] }
+        ['loss'],
+        { height: 200 }
       )
     });
   }
 }
 
-function testModel(model, inputData, normalizationData, features) {
-  const {inputs, labels, inputMax, inputMin, labelMin, labelMax} = normalizationData;
-
-  // Generate predictions for a uniform range of numbers between 0 and 1;
-  // We un-normalize the data by doing the inverse of the min-max scaling
-  // that we did earlier.
+function testModel(model, inputData) {
   const [xs, preds] = tf.tidy(() => {
+    const xs = tf.tensor2d(inputData.X, [inputData.X.length, inputData.X[0].length]);
+    const preds = model.predict(xs);
 
-    const preds = model.predict(inputs);
-
-    const unNormXs = inputs
-      .mul(inputMax.sub(inputMin))
-      .add(inputMin);
-
-    const unNormPreds = preds
-      .mul(labelMax.sub(labelMin))
-      .add(labelMin);
-
-    // Un-normalize the data
-    return [unNormXs.dataSync(), unNormPreds.dataSync()];
+    return [xs.arraySync(), preds.arraySync()];
   });
 
-  const predictedPoints = Array.from(xs).map((val, i) => {
-    return {x: val, y: preds[i]}
-  });
-
-  console.log("InputData: " + inputData);
-
+  let ymax = inputData.norm_data.y.max;
+  let ymin = inputData.norm_data.y.min;
   for(var f = 0; f < inputData.X[0].length; f++) {
     let originalPoints = [];
+    let predictedPoints = [];
+    let max = inputData.norm_data.X[f].max;
+    let min = inputData.norm_data.X[f].min;
     for(var i = 0; i < inputData.X.length; i++) {
-      originalPoints.push({ x: inputData.X[i][f], y: inputData.y[i][0] });
+      originalPoints.push({ x: ((max - min) * inputData.X[i][f] + min), y: ((ymax - ymin) * inputData.y[i][0] + ymin) });
+      predictedPoints.push({ x: ((max - min) * xs[i][f] + min), y: ((ymax - ymin) * preds[i][0] + ymin) });
     }
-
-    console.log(predictedPoints);
-    console.log(originalPoints);
 
     tfvis.render.scatterplot(
       {name: 'Model Predictions vs Original for ' + inputData.features[f]},
@@ -164,17 +177,14 @@ async function train_tf(model, data) {
   const {inputs, labels} = tensorData;
 
   // Train the model
-  await trainModel(model, inputs, labels, data.features);
+  let res = await trainModel(model, inputs, labels, data.features);
+  console.log(res);
   document.getElementById("test").disabled = false;
-
-  // Make some predictions using the model and compare them to the
-  // original data
 }
 
 function test_tf(model, data) {
   console.log("test_tf");
-  const tensorData = convertToTensor(data);
-  testModel(model, data, tensorData);
+  testModel(model, data);
 }
 
 class App extends Component {
@@ -225,8 +235,7 @@ class App extends Component {
     }
   }
 
-  TrainModel(e) {
-    console.log("Train Model");
+  async TrainModel(e) {
     let data = cleanData(JSON.parse(e.target.result));
 
     this.trainX = data.trainX;
@@ -234,31 +243,28 @@ class App extends Component {
     this.testX = data.testX;
     this.testy = data.testy;
     this.features = data.features;
+    this.norm_data = data.norm_data;
 
     this.Build(this.trainX[0].length, this.trainy[0].length);
-    train_tf(this.tfmodel, { X: this.trainX, y: this.trainy, features: this.features });
+    this.showVisor();
+    await train_tf(this.tfmodel, { X: this.trainX, y: this.trainy, features: this.features });
   }
 
   Test() {
-    console.log("Test");
-    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features });
+    this.showVisor();
+    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features, norm_data: this.norm_data });
+  }
+
+  showVisor() {
+    tfvis.visor().open();
   }
 
   render() {
     return (
       <div>
-        <h1>ML-Bros</h1>
-       <Tabs>
-        <div id="building" label="Building">
-          <Building test={this.Test} train={this.Train} getModel={this.getModel} setModel={this.setModel}/>
-        </div>
-        <div label="Neural Net">
-        </div>
-        <div label="Graph">
-        </div>
-        <div label="Results">
-        </div>
-      </Tabs>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"></link>
+        <h1 className="main-title">ML-Bros</h1>
+        <Building showVisor={this.showVisor} test={this.Test} train={this.Train} getModel={this.getModel} setModel={this.setModel}/>
       </div>
     );
   }

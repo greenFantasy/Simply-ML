@@ -120,7 +120,7 @@ class Layer {
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "16px serif";
+    ctx.font = "16px sans-serif";
     ctx.fillStyle = "black";
     ctx.fillText(this.name, w*(this.bbox.x+this.bbox.w/2), h*(this.bbox.y+this.bbox.h/2));
   }
@@ -473,13 +473,15 @@ class Building extends Component {
           <button id="train" onClick={this.props.train}>TRAIN</button>
           <button id="test" onClick={this.props.test}>TEST</button>
           <div className="left-break"></div>
+          <button id="showvisor" onClick={this.props.showVisor}>Show Graphs</button>
         </div>
         <div id="canvas-wrap">
           <canvas id="canvas" width="800" height="800" onDrop={canvasDrop} onDragOver={canvasAllowDrop}>
             <div className="no-canvas">Whoops! It looks like canvas isn't supported. Please upgrade to a newer browser.</div>
           </canvas>
           <div id="edit-tab">
-            <h3 id="edit-title"></h3>
+            <b>Name</b><br></br>
+            <input type="text" id="edit-title" style={{width: "auto"}}></input>
             <b>Number of Nodes</b><br></br>
             <input type="text" name="num_nodes" id="num_nodes"></input>
             <div id="invalid_nnodes" style={{display: "none"}}>Please enter an integer greater than 0</div>
