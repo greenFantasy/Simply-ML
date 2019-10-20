@@ -1,5 +1,5 @@
 {
-  "features": ["one", "two", "three"],
+  "features": ["one", "two", "three", "Milage"],
   "X": [
     [ 0.1, 0.2, 0.3 ],
     [ 0.4, 0.3, 0.1 ]
@@ -7,6 +7,5 @@
   "y": [
     [ 0.1 ],
     [ 0.2 ]
-  ],
-  "label": "Mileage"
+  ]
 }
