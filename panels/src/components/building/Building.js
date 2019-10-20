@@ -371,6 +371,8 @@ function Begin(model) {
     }
   }
 
+  document.getElementById("test").disabled = true;
+
   document.onkeydown = canvasKeyPress;
 }
 
@@ -466,10 +468,10 @@ class Building extends Component {
           <input className="file-input" type="file" id="train_f"></input>
           <div className="left-break"></div>
           <b>Number of Epochs</b>
-          <input className="form-input" type="text" id="epochs" value={32}></input>
+          <input className="form-input" type="text" id="epochs" defaultValue="32"></input>
           <div id="invalid_epochs" style={{display: "none"}}>Please enter an integer greater than 0</div>
           <button id="train" onClick={this.props.train}>TRAIN</button>
-          <button id="test" onClick={this.props.test} disabled={true}>TEST</button>
+          <button id="test" onClick={this.props.test}>TEST</button>
           <div className="left-break"></div>
         </div>
         <div id="canvas-wrap">

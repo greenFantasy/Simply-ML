@@ -12,7 +12,6 @@ require('./App.css');
  * and cleaned of missing data.
  */
 function cleanData(data) {
-  console.log(data);
   const features = data.features;
   const X = data.X;
   const y = data.y;
@@ -72,7 +71,6 @@ function convertToTensor(data) {
 
 async function trainModel(model, inputs, labels, features) {
   // Prepare the model for training.
-  console.log(model.layers.length);
   model.compile({
     optimizer: tf.train.adam(),
     loss: tf.losses.meanSquaredError,
@@ -166,8 +164,6 @@ async function train_tf(model, data) {
   const {inputs, labels} = tensorData;
 
   // Train the model
-  console.log(inputs);
-  console.log(labels);
   await trainModel(model, inputs, labels, data.features);
   document.getElementById("test").disabled = false;
 
@@ -176,6 +172,7 @@ async function train_tf(model, data) {
 }
 
 function test_tf(model, data) {
+  console.log("test_tf");
   const tensorData = convertToTensor(data);
   testModel(model, data, tensorData);
 }
@@ -193,7 +190,6 @@ class App extends Component {
   }
   // Entry point for setup
   setModel(model) {
-    console.log("Model passed: " + model);
     this.model = model;
   }
 
@@ -230,9 +226,8 @@ class App extends Component {
   }
 
   TrainModel(e) {
+    console.log("Train Model");
     let data = cleanData(JSON.parse(e.target.result));
-
-    console.log(data);
 
     this.trainX = data.trainX;
     this.trainy = data.trainy;
@@ -244,8 +239,9 @@ class App extends Component {
     train_tf(this.tfmodel, { X: this.trainX, y: this.trainy, features: this.features });
   }
 
-  Test(model) {
-    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features })
+  Test() {
+    console.log("Test");
+    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features });
   }
 
   render() {
