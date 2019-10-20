@@ -227,9 +227,11 @@ class Model {
 
   edit(idx) {
     this.clearEdit();
-    this.editing = idx;
-    this.layers[idx].edit = true;
-    Edit(this.layers[idx]);
+    if(idx != 0 && idx != this.layers.length-1) {
+      this.editing = idx;
+      this.layers[idx].edit = true;
+      Edit(this.layers[idx]);
+    }
   }
 
   clearHover() {
@@ -449,12 +451,10 @@ class Building extends Component {
             </ul>
           </div>
           <div className="left-break"></div>
-          <b>Training Data</b>
+          <b>Upload Data</b>
           <input className="file-input" type="file" id="train_f"></input>
-          <button id="train" onClick={this.props.train}>TRAIN</button><br></br>
           <div className="left-break"></div>
-          <b>Testing Data</b>
-          <input className="file-input" type="file" id="test_f"></input>
+          <button id="train" onClick={this.props.train}>TRAIN</button>
           <button id="test" onClick={this.props.test}>TEST</button>
         </div>
         <div id="canvas-wrap">

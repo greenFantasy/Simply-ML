@@ -12,9 +12,10 @@ require('./App.css');
  * and cleaned of missing data.
  */
 function cleanData(data) {
-  const features = data["features"];
-  const X = data["X"];
-  const y = data["y"];
+  console.log(data);
+  const features = data.features;
+  const X = data.X;
+  const y = data.y;
 
   let split = Math.round(0.9*X.length);
 
@@ -188,15 +189,19 @@ class App extends Component {
     this.model = model;
   }
 
-  Build() {
+  Build(in_size, out_size) {
     if(!this.model) {
       return;
     }
     this.tfmodel = tf.sequential();
     for(var l = 1; l < this.model.layers.length; l++) {
-      let data = { units: this.model.layers[l].n_nodes, activation: this.model.layers[l].activation };
+      let nodes = this.model.layers[l].n_nodes;
+      if(l == this.model.layers.length-1) {
+        nodes = out_size;
+      }
+      let data = { units: nodes, activation: this.model.layers[l].activation };
       if(l == 1) {
-        data.inputShape = [this.model.layers[0].n_nodes];
+        data.inputShape = [in_size];
       }
 
       this.tfmodel.add(tf.layers.dense(data));
@@ -227,7 +232,7 @@ class App extends Component {
     this.testy = data.testy;
     this.features = data.features;
 
-    this.Build();
+    this.Build(this.trainX[0].length, this.trainy[0].length);
     train_tf(this.tfmodel, { X: this.trainX, y: this.trainy });
   }
 
