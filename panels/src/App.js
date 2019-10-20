@@ -65,6 +65,7 @@ function convertToTensor(data) {
 
 async function trainModel(model, inputs, labels) {
   // Prepare the model for training.
+  console.log(model.layers.length);
   model.compile({
     optimizer: tf.train.adam(),
     loss: tf.losses.meanSquaredError,
