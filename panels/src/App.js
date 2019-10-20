@@ -11,14 +11,20 @@ require('./App.css');
  * Get the car data reduced to just the variables we are interested
  * and cleaned of missing data.
  */
-async function getData(carsData) {
-  const cleaned = carsData.map(car => ({
-    mpg: car.Miles_per_Gallon,
-    horsepower: car.Horsepower,
-  }))
-  .filter(car => (car.mpg != null && car.horsepower != null));
+function cleanData(data) {
+  const features = data["features"];
+  const X = data["X"];
+  const y = data["y"];
 
-  return cleaned;
+  let split = Math.round(0.9*X.length);
+
+  const trainX = X.slice(0, split);
+  const trainy = y.slice(0, split);
+  const testX = X.slice(split);
+  const testy = y.slice(split);
+
+
+  return {trainX: trainX, trainy: trainy, testX: testX, testy: testy, features: features};
 }
 
 /**
@@ -36,11 +42,11 @@ function convertToTensor(data) {
     tf.util.shuffle(data);
 
     // Step 2. Convert data to Tensor
-    const inputs = data.map(d => d.horsepower)
-    const labels = data.map(d => d.mpg);
+    const inputs = data.X;
+    const labels = data.y;
 
-    const inputTensor = tf.tensor2d(inputs, [inputs.length, 1]);
-    const labelTensor = tf.tensor2d(labels, [labels.length, 1]);
+    const inputTensor = tf.tensor2d(inputs, [inputs.length, inputs[0].length]);
+    const labelTensor = tf.tensor2d(labels, [labels.length, labels[0].length]);
 
     //Step 3. Normalize the data to the range 0 - 1 using min-max scaling
     const inputMax = inputTensor.max();
@@ -68,11 +74,11 @@ async function trainModel(model, inputs, labels) {
   model.compile({
     optimizer: tf.train.adam(),
     loss: tf.losses.meanSquaredError,
-    metrics: ['mse'],
+    metrics: ['mse', 'acc'],
   });
 
   const batchSize = 32;
-  const epochs = 50;
+  const epochs = 100;
 
   return await model.fit(inputs, labels, {
     batchSize,
@@ -80,7 +86,7 @@ async function trainModel(model, inputs, labels) {
     shuffle: true,
     callbacks: tfvis.show.fitCallbacks(
       { name: 'Training Performance' },
-      ['loss', 'mse'],
+      ['loss', 'mse','acc'],
       { height: 200, callbacks: ['onEpochEnd'] }
     )
   });
@@ -130,15 +136,10 @@ function testModel(model, inputData, normalizationData) {
   );
 }
 
-async function run(model, carsData) {
+async function train_tf(model, data) {
   // Load and plot the original input data that we are going to train on.
-  const data = await getData(carsData);
-  const values = data.map(d => ({
-    x: d.horsepower,
-    y: d.mpg,
-  }));
 
-  tfvis.render.scatterplot(
+  /*tfvis.render.scatterplot(
     {name: 'Horsepower v MPG'},
     {values},
     {
@@ -146,7 +147,7 @@ async function run(model, carsData) {
       yLabel: 'MPG',
       height: 300
     }
-  );
+  );*/
 
   // More code will be added below
 
@@ -155,11 +156,17 @@ async function run(model, carsData) {
   const {inputs, labels} = tensorData;
 
   // Train the model
+  console.log(inputs);
+  console.log(labels);
   await trainModel(model, inputs, labels);
   console.log('Done Training');
 
   // Make some predictions using the model and compare them to the
   // original data
+}
+
+function test_tf(model, data) {
+  const tensorData = convertToTensor(data);
   testModel(model, data, tensorData);
 }
 
@@ -190,11 +197,11 @@ class App extends Component {
       if(l == 1) {
         data.inputShape = [this.model.layers[0].n_nodes];
       }
-    
+
       this.tfmodel.add(tf.layers.dense(data));
     }
   }
-  
+
   getModel() {
     return this.model;
   }
@@ -209,19 +216,29 @@ class App extends Component {
   }
 
   TrainModel(e) {
-    let data = JSON.parse(e.target.result);
+    let data = cleanData(JSON.parse(e.target.result));
+
+    console.log(data);
+
+    this.trainX = data.trainX;
+    this.trainy = data.trainy;
+    this.testX = data.testX;
+    this.testy = data.testy;
+    this.features = data.features;
+
     this.Build();
-    run(this.tfmodel, data);
+    train_tf(this.tfmodel, { X: this.trainX, y: this.trainy });
   }
 
   Test(model) {
+    test_tf(this.tfmodel, { X: this.testX, y: this.trainy })
   }
 
   render() {
     return (
       <div>
         <h1>ML-Bros</h1>
-       <Tabs> 
+       <Tabs>
         <div id="building" label="Building">
           <Building test={this.Test} train={this.Train} getModel={this.getModel} setModel={this.setModel}/>
         </div>
