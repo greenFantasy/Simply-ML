@@ -166,7 +166,7 @@ class Model {
 
   appendLayer(name, n_nodes) {
     for(var l in this.layers) {
-      if(this.layers[l].name == name) {
+      if(this.layers[l].name === name) {
         let words = this.layers[l].name.split(" ");
         let num = parseInt(words[words.length-1]);
 
@@ -194,8 +194,8 @@ class Model {
     for(var l = 0; l < this.layers.length - 1; l++) {
       this.layers[l].drawCurveTo(this.layers[l+1], this.context);
     }
-    for(var l in this.layers) {
-      this.layers[l].draw(this.context);
+    for(var l2 in this.layers) {
+      this.layers[l2].draw(this.context);
     }
   }
 
@@ -205,7 +205,7 @@ class Model {
   }
 
   get isHover() {
-    return this.hover != -1;
+    return this.hover !== -1;
   }
 
   get hoverID() {
@@ -213,13 +213,13 @@ class Model {
   }
 
   removeCurrLayer() {
-    if(this.hover == this.editing && this.hover != -1 && this.hover != 0 && this.hover != this.layers.length-1) {
+    if(this.hover === this.editing && this.hover !== -1 && this.hover !== 0 && this.hover !== this.layers.length-1) {
       this.layers.splice(this.hover, 1);
     }
   }
 
   clearEdit() {
-    if(this.editing != -1) {
+    if(this.editing !== -1) {
       this.layers[this.editing].edit = false;
       this.editing = -1;
     }
@@ -227,7 +227,7 @@ class Model {
 
   edit(idx) {
     this.clearEdit();
-    if(idx != 0 && idx != this.layers.length-1) {
+    if(idx !== 0 && idx !== this.layers.length-1) {
       this.editing = idx;
       this.layers[idx].edit = true;
       Edit(this.layers[idx]);
@@ -235,14 +235,14 @@ class Model {
   }
 
   clearHover() {
-    if(this.hover != -1) {
+    if(this.hover !== -1) {
       this.layers[this.hover].clearHover();
     }
     this.hover = -1;
   }
 
   grab(p) {
-    if(this.hover != -1) {
+    if(this.hover !== -1) {
       this.grabbed = true;
       this.grab_offset.x = p.x - this.layers[this.hover].bbox.x;
       this.grab_offset.y = p.y - this.layers[this.hover].bbox.y;
@@ -252,7 +252,7 @@ class Model {
   }
 
   move(p) {
-    if(this.hover != -1) {
+    if(this.hover !== -1) {
       this.layers[this.hover].bbox.x = p.x - this.grab_offset.x;
       this.layers[this.hover].bbox.y = p.y - this.grab_offset.y;
     }
@@ -312,7 +312,7 @@ function canvasMouseDown(e) {
     console.log("grab");
     curr_model.grab(p);
   }
-  if(!curr_model.isHover || (curr_model.hoverID == 0 || curr_model.hoverID == curr_model.layers.length-1)) {
+  if(!curr_model.isHover || (curr_model.hoverID === 0 || curr_model.hoverID === curr_model.layers.length-1)) {
     document.getElementById("edit-tab").style.display = "none";
     curr_model.clearEdit();
   }
@@ -333,7 +333,7 @@ function canvasMouseOut(e) {
 
 var curr_model;
 
-function Begin(model) {
+function Begin(model_in) {
   let context = getContext("canvas");
 
   let layers = document.getElementById("horizontal-list").children;
@@ -349,8 +349,9 @@ function Begin(model) {
     context.canvas.onmouseout = canvasMouseOut;
   }
 
+  var model = model_in;
   if(!model) {
-    var model = new Model("Model1", context);
+    model = new Model("Model1", context);
     //model.appendLayer("Layer2", 10);
   }
 
@@ -397,14 +398,14 @@ function canvasDrop(e) {
   layer.bbox.x = p.x - layer.bbox.w/2;
   layer.bbox.y = p.y - layer.bbox.h/2;
 }
-
+/*
 function onResize() {
   let canvas = document.getElementById("canvas");
   let canvas_wrap = document.getElementById("canvas-wrap");
 
   canvas.width = canvas_wrap.offsetWidth;
   curr_model.draw();
-}
+}*/
 
 function Edit(layer) {
   document.getElementById("edit-tab").style.display = "block";
@@ -434,7 +435,7 @@ function Edit(layer) {
 }
 
 function canvasKeyPress(e) {
-  if(e.keyCode == 46 || e.keyCode == 8) {
+  if(e.keyCode === 46 || e.keyCode === 8) {
     curr_model.removeCurrLayer();
   }
 }

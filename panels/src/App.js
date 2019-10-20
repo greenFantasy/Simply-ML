@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
-import Tabs from './components/Tabs';
+//import Tabs from './components/Tabs';
 import Building from './components/building/Building';
 import * as tf from '@tensorflow/tfjs';
 import * as tfvis from '@tensorflow/tfjs-vis';
-import background from './background.png';
+//import background from './background.png';
 require('./App.css');
 
 /**
@@ -31,24 +31,24 @@ function cleanData(data) {
         min = X_in[i][j];
       }
     }
-    for(var i = 0; i < X_in.length; i++) {
-      X_in[i][j] = (X_in[i][j] - min) / (max - min);
+    for(var i2 = 0; i2 < X_in.length; i2++) {
+      X_in[i2][j] = (X_in[i2][j] - min) / (max - min);
     }
     norm_data.X.push({ min: min, max: max });
   }
     
   let max = -10000000;
   let min = 10000000;
-  for(var j = 0; j < y_in.length; j++) {
-    if(y_in[j][0] > max) {
-      max = y_in[j][0];
+  for(var j2 = 0; j2 < y_in.length; j2++) {
+    if(y_in[j2][0] > max) {
+      max = y_in[j2][0];
     }
-    if(y_in[j][0] < min) {
-      min = y_in[j][0];
+    if(y_in[j2][0] < min) {
+      min = y_in[j2][0];
     }
   }
-  for(var j = 0; j < y_in.length; j++) {
-   y_in[j][0] = (y_in[j][0] - min) / (max - min);
+  for(var j3 = 0; j3 < y_in.length; j3++) {
+   y_in[j3][0] = (y_in[j3][0] - min) / (max - min);
   }
   norm_data.y = { min: min, max: max };
 
@@ -58,13 +58,13 @@ function cleanData(data) {
   let test_y = [];
   let split = 0.8;
 
-  for(var i = 0; i < X_in.length; i++) {
+  for(var i3 = 0; i3 < X_in.length; i3++) {
     if(Math.random() < split) {
-      train_X.push(X_in[i]);
-      train_y.push(y_in[i]);
+      train_X.push(X_in[i3]);
+      train_y.push(y_in[i3]);
     } else {
-      test_X.push(X_in[i]);
-      test_y.push(y_in[i]);
+      test_X.push(X_in[i3]);
+      test_y.push(y_in[i3]);
     }
   }
   
@@ -200,6 +200,10 @@ class App extends Component {
     this.reader = new FileReader();
   }
 
+  componentDidMount() {
+    document.title = "Simply ML";
+  }
+
   // Entry point for setup
   setModel(model) {
     this.model = model;
@@ -212,11 +216,11 @@ class App extends Component {
     this.tfmodel = tf.sequential();
     for(var l = 1; l < this.model.layers.length; l++) {
       let nodes = this.model.layers[l].n_nodes;
-      if(l == this.model.layers.length-1) {
+      if(l === this.model.layers.length-1) {
         nodes = out_size;
       }
       let data = { units: nodes, activation: this.model.layers[l].activation };
-      if(l == 1) {
+      if(l === 1) {
         data.inputShape = [in_size];
       }
 
