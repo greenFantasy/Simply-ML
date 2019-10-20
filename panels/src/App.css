@@ -2,11 +2,16 @@
   font-family: 'Roboto', sans-serif;
 }
 
-body {
+.background {
   background-image: url(./background.png);
   background-size: cover;
   background-repeat: no-repeat;
-  height: 100vh;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  z-index: -10;
 }
 
 .App {

@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import './App.css';
 //import Tabs from './components/Tabs';
 import Building from './components/building/Building';
+import Background from './components/background/Background';
 import * as tf from '@tensorflow/tfjs';
 import * as tfvis from '@tensorflow/tfjs-vis';
 //import background from './background.png';
@@ -319,6 +320,7 @@ class App extends Component {
   render() {
     return (
       <div>
+        <Background />
         <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"></link>
         <h1 className="main-title">Simply ML</h1>
         <Building showVisor={this.showVisor} test={this.Test} train={this.Train} getModel={this.getModel} setModel={this.setModel}/>
