@@ -199,6 +199,7 @@ class App extends Component {
     this.Train = this.Train.bind(this);
     this.reader = new FileReader();
   }
+
   // Entry point for setup
   setModel(model) {
     this.model = model;

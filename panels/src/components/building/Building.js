@@ -443,11 +443,22 @@ class Building extends Component {
   componentDidMount() {
     Begin(this.props.getModel());
     this.props.setModel(curr_model);
+
+    setInterval(function() {
+      var container = document.getElementById("container");
+      var visor = document.getElementById("tfjs-visor-container");
+
+      if(visor && visor.children[0].dataset.isopen) {
+        container.style.justifyContent = "left";
+      } else {
+        container.style.justifyContent = "center";
+      }
+    }, 500);
   }
 
   render() {
     return (
-      <div className="container">
+      <div id="container">
         <div id="menu-outer">
           <h3 className="layers-title">Layers</h3>
           <div className="table">
@@ -460,6 +471,9 @@ class Building extends Component {
               </li>
               <li draggable="true" onDragStart={dragLayer} data-name="Tanh" data-activation="tanh">
                 <canvas id="tanh_canvas" width="150" height="30"></canvas>
+              </li>
+              <li draggable="true" onDragStart={dragLayer} data-name="Softsign" data-activation="softsign">
+                <canvas id="softsign_canvas" width="150" height="30"></canvas>
               </li>
             </ul>
           </div>
