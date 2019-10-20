@@ -460,6 +460,7 @@ class Building extends Component {
   render() {
     return (
       <div id="container">
+        <button id="showvisor" onClick={this.props.showVisor}>Show Graphs</button>
         <div id="menu-outer">
           <h3 className="layers-title">Layers</h3>
           <div className="table">
@@ -486,9 +487,9 @@ class Building extends Component {
           <input className="form-input" type="text" id="epochs" defaultValue="32"></input>
           <div id="invalid_epochs" style={{display: "none"}}>Please enter an integer greater than 0</div>
           <button id="train" onClick={this.props.train}>TRAIN</button>
-          <button id="test" onClick={this.props.test}>TEST</button>
           <div className="left-break"></div>
-          <button id="showvisor" onClick={this.props.showVisor}>Show Graphs</button>
+          <button id="test" onClick={this.props.test}>TEST</button>
+          <ol id="error-table"></ol>
         </div>
         <div id="canvas-wrap">
           <canvas id="canvas" width="800" height="800" onDrop={canvasDrop} onDragOver={canvasAllowDrop}>

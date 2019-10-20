@@ -125,27 +125,68 @@ async function trainModel(model, inputs, labels, features) {
   }
 }
 
-function testModel(model, inputData) {
+async function testModel(model, inputData) {
   const [xs, preds] = tf.tidy(() => {
     const xs = tf.tensor2d(inputData.X, [inputData.X.length, inputData.X[0].length]);
     const preds = model.predict(xs);
 
     return [xs.arraySync(), preds.arraySync()];
   });
+  
+  let table = document.getElementById("error-table");
+  table.style.display = "block";
 
   let ymax = inputData.norm_data.y.max;
   let ymin = inputData.norm_data.y.min;
+ 
+  let ranges = [0.01, 0.05, 0.1, 0.2];
+  
+  let ranges_counts = []
+  for(var k in ranges) {
+    ranges_counts.push(0);
+  }
+  
+  for(var p = 0; p < inputData.X.length; p++) {
+    let y = ((ymax - ymin) * inputData.y[p][0] + ymin);
+    let y_hat = ((ymax - ymin) * preds[p][0] + ymin);
+    let error = Math.abs((y_hat - y) / y);
+    console.log(error);
+    
+    for(var r  = 0; r < ranges.length; r++) {
+      if(error < ranges[r]) {
+        ranges_counts[r] += 1.0/inputData.X.length;
+        break;
+      }
+    }
+  }
+
+  while (table.firstChild) {
+    table.removeChild(table.firstChild);
+  }
+
+  for(var j in ranges) {
+    var e = document.createElement("LI");
+    e.className = "error-table-li";
+    var te = document.createTextNode("Less than " + ((100 * ranges[j]).toFixed(0)) + "%: " + (100 * ranges_counts[j]).toFixed(1) + "%");
+    e.appendChild(te);
+    table.appendChild(e);
+  }
+
+  let plots = [];
+
   for(var f = 0; f < inputData.X[0].length; f++) {
     let originalPoints = [];
     let predictedPoints = [];
     let max = inputData.norm_data.X[f].max;
     let min = inputData.norm_data.X[f].min;
     for(var i = 0; i < inputData.X.length; i++) {
-      originalPoints.push({ x: ((max - min) * inputData.X[i][f] + min), y: ((ymax - ymin) * inputData.y[i][0] + ymin) });
-      predictedPoints.push({ x: ((max - min) * xs[i][f] + min), y: ((ymax - ymin) * preds[i][0] + ymin) });
+      let y = ((ymax - ymin) * inputData.y[i][0] + ymin);
+      let y_hat = ((ymax - ymin) * preds[i][0] + ymin);
+      originalPoints.push({ x: ((max - min) * inputData.X[i][f] + min), y: y }); 
+      predictedPoints.push({ x: ((max - min) * xs[i][f] + min), y: y_hat }); 
     }
 
-    tfvis.render.scatterplot(
+    let plot = await tfvis.render.scatterplot(
       {name: 'Model Predictions vs Original for ' + inputData.features[f]},
       {values: [originalPoints, predictedPoints], series: ['original', 'predicted']},
       {
@@ -154,7 +195,10 @@ function testModel(model, inputData) {
         height: 300
       }
     );
+    plots.push(plot);
   }
+
+  return plots;
 }
 
 async function train_tf(model, data) {
@@ -171,7 +215,8 @@ async function train_tf(model, data) {
     }
   );*/
 
-  // More code will be added below
+  let table = document.getElementById("error-table");
+  table.style.display = "none";
 
   // Convert the data to a form we can use for training.
   const tensorData = convertToTensor(data);
@@ -183,9 +228,9 @@ async function train_tf(model, data) {
   document.getElementById("test").disabled = false;
 }
 
-function test_tf(model, data) {
+async function test_tf(model, data) {
   console.log("test_tf");
-  testModel(model, data);
+  return testModel(model, data);
 }
 
 class App extends Component {
@@ -256,9 +301,15 @@ class App extends Component {
     await train_tf(this.tfmodel, { X: this.trainX, y: this.trainy, features: this.features });
   }
 
-  Test() {
+  async Test() {
+    if(this.test_plots) {
+    /*  console.log(this.test_plots);
+      for(var p in this.test_plots) {
+        this.test_plots[p].close();
+      }*/
+    }
     this.showVisor();
-    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features, norm_data: this.norm_data });
+    this.test_plots = await test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features, norm_data: this.norm_data });
   }
 
   showVisor() {

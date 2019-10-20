@@ -62,6 +62,8 @@ body {
   padding: 5px;
   text-align: center;
   background-color: rgba(255, 255, 255, 0.7);
+  min-width: 220px;
+  min-width: 220px;
 }
 
 .layers-title {
@@ -134,7 +136,7 @@ input[type=text] {
   background-color: rgba(255, 255, 255, 0.7);
 }
 
-#menu-outer button{
+button{
   display: block;
   padding: 15px 40px;
   margin: 10px;
@@ -157,4 +159,33 @@ input[type=text] {
   text-align: center;
   padding: 20px;
   margin: 0;
+  font-family: "Courier";
+  color: yellow;
+  font-weight: bold;
+}
+
+#error-table {
+  border: 1px solid #666;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-table-li {
+  list-style-type: none;
+  padding: 10px;
+}
+
+.error-table-li:nth-child(even) {
+  background-color: #eee;
+}
+
+#showvisor {
+  position: fixed;
+  right: 20px;
+  top: 20px;
 }
