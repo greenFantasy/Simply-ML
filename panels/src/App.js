@@ -69,7 +69,7 @@ function convertToTensor(data) {
   });
 }
 
-async function trainModel(model, inputs, labels) {
+async function trainModel(model, inputs, labels, features) {
   // Prepare the model for training.
   model.compile({
     optimizer: tf.train.adam(),
@@ -158,7 +158,7 @@ async function train_tf(model, data) {
   // Train the model
   console.log(inputs);
   console.log(labels);
-  await trainModel(model, inputs, labels);
+  await trainModel(model, inputs, labels, data.features);
   console.log('Done Training');
 
   // Make some predictions using the model and compare them to the
@@ -227,7 +227,7 @@ class App extends Component {
     this.features = data.features;
 
     this.Build();
-    train_tf(this.tfmodel, { X: this.trainX, y: this.trainy });
+    train_tf(this.tfmodel, { X: this.trainX, y: this.trainy, features: this.features });
   }
 
   Test(model) {
