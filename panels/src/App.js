@@ -17,7 +17,7 @@ function cleanData(data) {
   const X = data.X;
   const y = data.y;
 
-  let split = Math.floor(0.9*X.length);
+  let split = Math.floor(0.5*X.length);
 
   const trainX = X.slice(0, split);
   const trainy = y.slice(0, split);
@@ -80,18 +80,20 @@ async function trainModel(model, inputs, labels, features) {
   });
 
   const batchSize = 32;
-  const epochs = 100;
+  const epochs = parseInt(document.getElementById("epochs").value);
 
-  return await model.fit(inputs, labels, {
-    batchSize,
-    epochs,
-    shuffle: true,
-    callbacks: tfvis.show.fitCallbacks(
-      { name: 'Training Performance' },
-      ['loss', 'mse','acc'],
-      { height: 200, callbacks: ['onEpochEnd'] }
-    )
-  });
+  if(!isNaN(epochs) && epochs > 0) {
+    return await model.fit(inputs, labels, {
+      batchSize,
+      epochs,
+      shuffle: true,
+      callbacks: tfvis.show.fitCallbacks(
+        { name: 'Training Performance' },
+        ['loss', 'mse','acc'],
+        { height: 200, callbacks: ['onEpochEnd'] }
+      )
+    });
+  }
 }
 
 function testModel(model, inputData, normalizationData, features) {

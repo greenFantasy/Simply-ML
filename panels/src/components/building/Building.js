@@ -361,6 +361,16 @@ function Begin(model) {
   //onResize();
   //window.onresize = onResize;
 
+  document.getElementById("epochs").oninput = function() {
+    let v = parseInt(this.value);
+    let invalid = document.getElementById("invalid_epochs");
+    if(isNaN(v) || v < 1) {
+      invalid.style.display = "block";
+    } else {
+      invalid.style.display = "none";
+    }
+  }
+
   document.onkeydown = canvasKeyPress;
 }
 
@@ -455,8 +465,12 @@ class Building extends Component {
           <b>Upload Data</b>
           <input className="file-input" type="file" id="train_f"></input>
           <div className="left-break"></div>
+          <b>Number of Epochs</b>
+          <input className="form-input" type="text" id="epochs" value="32"></input>
+          <div id="invalid_epochs" style={{display: "none"}}>Please enter an integer greater than 0</div>
           <button id="train" onClick={this.props.train}>TRAIN</button>
-          <button id="test" onClick={this.props.test}>TEST</button>
+          <button id="test" onClick={this.props.test} disabled="true">TEST</button>
+          <div className="left-break"></div>
         </div>
         <div id="canvas-wrap">
           <canvas id="canvas" width="800" height="800" onDrop={canvasDrop} onDragOver={canvasAllowDrop}>
