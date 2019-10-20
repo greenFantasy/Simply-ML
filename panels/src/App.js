@@ -17,7 +17,7 @@ function cleanData(data) {
   const X = data.X;
   const y = data.y;
 
-  let split = Math.round(0.9*X.length);
+  let split = Math.floor(0.9*X.length);
 
   const trainX = X.slice(0, split);
   const trainy = y.slice(0, split);
@@ -94,18 +94,17 @@ async function trainModel(model, inputs, labels, features) {
   });
 }
 
-function testModel(model, inputData, normalizationData) {
-  const {inputMax, inputMin, labelMin, labelMax} = normalizationData;
+function testModel(model, inputData, normalizationData, features) {
+  const {inputs, labels, inputMax, inputMin, labelMin, labelMax} = normalizationData;
 
   // Generate predictions for a uniform range of numbers between 0 and 1;
   // We un-normalize the data by doing the inverse of the min-max scaling
   // that we did earlier.
   const [xs, preds] = tf.tidy(() => {
 
-    const xs = tf.linspace(0, 1, 100);
-    const preds = model.predict(xs.reshape([100, 1]));
+    const preds = model.predict(inputs);
 
-    const unNormXs = xs
+    const unNormXs = inputs
       .mul(inputMax.sub(inputMin))
       .add(inputMin);
 
@@ -117,28 +116,30 @@ function testModel(model, inputData, normalizationData) {
     return [unNormXs.dataSync(), unNormPreds.dataSync()];
   });
 
-
   const predictedPoints = Array.from(xs).map((val, i) => {
     return {x: val, y: preds[i]}
   });
 
-  const originalPoints = inputData.map(d => ({
-    x: d.horsepower, y: d.mpg,
-  }));
-
-
-  tfvis.render.scatterplot(
-    {name: 'Model Predictions vs Original Data'},
-    {values: [originalPoints, predictedPoints], series: ['original', 'predicted']},
-    {
-      xLabel: 'Horsepower',
-      yLabel: 'MPG',
-      height: 300
+  for(var f = 0; f < inputData.X[0].length; f++) {
+    let originalPoints = [];
+    for(var i = 0; i < inputData.X.length; i++) {
+      originalPoints.push({ x: inputData.X[i][f], y: inputData.y[i][0] });
     }
-  );
+
+    tfvis.render.scatterplot(
+      {name: 'Model Predictions vs Original Data'},
+      {values: [originalPoints, predictedPoints], series: ['original', 'predicted']},
+      {
+        xLabel: inputData.features[f],
+        yLabel: inputData.features[inputData.features.length-1],
+        height: 300
+      }
+    );
+  }
 }
 
 async function train_tf(model, data) {
+  document.getElementById("test").disabled = true;
   // Load and plot the original input data that we are going to train on.
 
   /*tfvis.render.scatterplot(
@@ -161,7 +162,7 @@ async function train_tf(model, data) {
   console.log(inputs);
   console.log(labels);
   await trainModel(model, inputs, labels, data.features);
-  console.log('Done Training');
+  document.getElementById("test").disabled = false;
 
   // Make some predictions using the model and compare them to the
   // original data
@@ -237,7 +238,7 @@ class App extends Component {
   }
 
   Test(model) {
-    test_tf(this.tfmodel, { X: this.testX, y: this.trainy })
+    test_tf(this.tfmodel, { X: this.testX, y: this.testy, features: this.features })
   }
 
   render() {

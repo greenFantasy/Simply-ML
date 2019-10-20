@@ -311,7 +311,8 @@ function canvasMouseDown(e) {
   if(curr_model.isHover) {
     console.log("grab");
     curr_model.grab(p);
-  } else {
+  }
+  if(!curr_model.isHover || (curr_model.hoverID == 0 || curr_model.hoverID == curr_model.layers.length-1)) {
     document.getElementById("edit-tab").style.display = "none";
     curr_model.clearEdit();
   }
