@@ -64,7 +64,7 @@ class Layer {
   setHover() {
     this.lineWidth = 2;
   }
-  
+
   clearHover() {
     this.lineWidth = 1;
   }
@@ -89,14 +89,14 @@ class Layer {
   drawBackground(ctx) {
     let w = ctx.canvas.clientWidth;
     let h = ctx.canvas.clientHeight;
-    
+
     pathRoundedRect(ctx, this.bbox.x * w, this.bbox.y * h, this.bbox.w * w, this.bbox.h * h, 10);
   }
 
   drawEdit(ctx) {
     let w = ctx.canvas.clientWidth;
     let h = ctx.canvas.clientHeight;
-    
+
     ctx.lineWidth = "1px";
     let p = 0.02;
     ctx.strokeRect(w*(this.bbox.x-p), h*(this.bbox.y-p), w*(this.bbox.w+2*p), h*(this.bbox.h+2*p));
@@ -117,7 +117,7 @@ class Layer {
     this.drawBackground(ctx);
     ctx.fill();
     ctx.stroke();
-   
+
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "16px serif";
@@ -160,8 +160,8 @@ class Model {
     this.grabbed = false;
     this.grab_offset = new Vec2(0,0);
     this.editing = -1;
-    this.layers.push(new InputLayer("Input", 1, false)); 
-    this.layers.push(new OutputLayer("Output", 1, false)); 
+    this.layers.push(new InputLayer("Input", 1, false));
+    this.layers.push(new OutputLayer("Output", 1, false));
   }
 
   appendLayer(name, n_nodes) {
@@ -188,10 +188,10 @@ class Model {
     if(!this.context) {
       return;
     }
- 
+
     this.context.clearRect(0, 0, this.context.canvas.clientWidth, this.context.canvas.clientHeight);
- 
-    for(var l = 0; l < this.layers.length - 1; l++) { 
+
+    for(var l = 0; l < this.layers.length - 1; l++) {
       this.layers[l].drawCurveTo(this.layers[l+1], this.context);
     }
     for(var l in this.layers) {
@@ -240,7 +240,7 @@ class Model {
     }
     this.hover = -1;
   }
-  
+
   grab(p) {
     if(this.hover != -1) {
       this.grabbed = true;
@@ -250,7 +250,7 @@ class Model {
       this.edit(this.hover);
     }
   }
-  
+
   move(p) {
     if(this.hover != -1) {
       this.layers[this.hover].bbox.x = p.x - this.grab_offset.x;
@@ -277,7 +277,7 @@ function getNormMouse(elem, e) {
 
 function canvasMouseMove(e) {
   let p = getNormMouse(this, e);
-  
+
   if(curr_model.isGrab) {
     console.log("grab move");
     curr_model.move(p);
@@ -357,7 +357,7 @@ function Begin(model) {
   curr_model = model;
   curr_model.context = context;
   model.draw();
-  
+
   //onResize();
   //window.onresize = onResize;
 
@@ -421,7 +421,7 @@ function Edit(layer) {
     }
     layer.n_nodes = parseInt(this.value);
   }
-  
+
   title.oninput = function() {
     let n = this.value;
 
@@ -466,10 +466,10 @@ class Building extends Component {
           <input className="file-input" type="file" id="train_f"></input>
           <div className="left-break"></div>
           <b>Number of Epochs</b>
-          <input className="form-input" type="text" id="epochs" value="32"></input>
+          <input className="form-input" type="text" id="epochs" value={32}></input>
           <div id="invalid_epochs" style={{display: "none"}}>Please enter an integer greater than 0</div>
           <button id="train" onClick={this.props.train}>TRAIN</button>
-          <button id="test" onClick={this.props.test} disabled="true">TEST</button>
+          <button id="test" onClick={this.props.test} disabled={true}>TEST</button>
           <div className="left-break"></div>
         </div>
         <div id="canvas-wrap">

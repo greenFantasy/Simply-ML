@@ -122,14 +122,19 @@ function testModel(model, inputData, normalizationData, features) {
     return {x: val, y: preds[i]}
   });
 
+  console.log("InputData: " + inputData);
+
   for(var f = 0; f < inputData.X[0].length; f++) {
     let originalPoints = [];
     for(var i = 0; i < inputData.X.length; i++) {
       originalPoints.push({ x: inputData.X[i][f], y: inputData.y[i][0] });
     }
 
+    console.log(predictedPoints);
+    console.log(originalPoints);
+
     tfvis.render.scatterplot(
-      {name: 'Model Predictions vs Original Data'},
+      {name: 'Model Predictions vs Original for ' + inputData.features[f]},
       {values: [originalPoints, predictedPoints], series: ['original', 'predicted']},
       {
         xLabel: inputData.features[f],
