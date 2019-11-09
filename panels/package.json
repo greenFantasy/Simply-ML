@@ -2,6 +2,7 @@
   "name": "panels",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://simplyml.tech", 
   "dependencies": {
     "@tensorflow/tfjs": "^1.2.11",
     "@tensorflow/tfjs-vis": "^1.2.0",
