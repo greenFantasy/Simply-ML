@@ -18,4 +18,4 @@ Then, imply run `npm start` from the `panels/` directory!
 ## Example
 
 Model building screen:
-![Could not be loaded](httpesdfd:)
+![Could not be loaded](https://raw.githubusercontent.com/greenFantasy/Simply-ML/master/sample.png "Main Page")
