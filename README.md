@@ -14,3 +14,8 @@ First, install the following Node.js dependencies:
 - react-scripts 
 
 Then, imply run `npm start` from the `panels/` directory!
+
+## Example
+
+Model building screen:
+![Could not be loaded](httpesdfd:)
